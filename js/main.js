@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollReveal();
   initTypewriter();
   initClock();
+  initCounters();
 });
 
 function initNavigation() {
@@ -98,4 +99,39 @@ function initClock() {
 
   update();
   setInterval(update, 1000);
+}
+
+function initCounters() {
+  const counters = document.querySelectorAll('.stat-number[data-count]');
+  if (!counters.length) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const target = parseInt(el.dataset.count, 10);
+          let current = 0;
+          const duration = 1500;
+          const step = target / (duration / 16);
+
+          function tick() {
+            current += step;
+            if (current >= target) {
+              el.textContent = target;
+              return;
+            }
+            el.textContent = Math.floor(current);
+            requestAnimationFrame(tick);
+          }
+
+          tick();
+          observer.unobserve(el);
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
+
+  counters.forEach(el => observer.observe(el));
 }
